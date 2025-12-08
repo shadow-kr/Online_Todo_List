@@ -25,7 +25,6 @@
         margin-bottom: 20px;
     }
 
-    /* Input Section */
     .new-task {
         display: flex;
         gap: 10px;
@@ -48,7 +47,6 @@
         color: white;
     }
 
-    /* Task List */
     #taskList {
         max-height: 300px;
         overflow-y: auto;
@@ -102,6 +100,8 @@
     </div>
 
     <div id="taskList"></div>
+
+    <button id="exportBtn" onclick="exportList()" style="width:100%; margin-top:15px; padding:10px; background:#009688; border:none; border-radius:8px; color:white; cursor:pointer;">Export Tasks</button>
 </div>
 
 <script>
@@ -150,6 +150,24 @@ function addTask() {
 
     list.appendChild(div);
     input.value = "";
+}
+
+function exportList() {
+    const tasks = document.querySelectorAll('.task span');
+    let text = '';
+    tasks.forEach(t => {
+        text += t.textContent + '\n';
+    });
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'todo_list.txt';
+    a.click();
+
+    URL.revokeObjectURL(url);
 }
 </script>
 </body>
