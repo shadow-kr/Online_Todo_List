@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Modern To-Do List (Dark)</title>
+<title>Modern To-Do List (Dark + Persistent)</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -88,6 +88,17 @@
     input[type="color"] {
         display: none;
     }
+
+    #exportBtn {
+        width: 100%;
+        margin-top: 15px;
+        padding: 10px;
+        background: #009688;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        cursor: pointer;
+    }
 </style>
 </head>
 <body>
@@ -101,10 +112,69 @@
 
     <div id="taskList"></div>
 
-    <button id="exportBtn" onclick="exportList()" style="width:100%; margin-top:15px; padding:10px; background:#009688; border:none; border-radius:8px; color:white; cursor:pointer;">Export Tasks</button>
+    <button id="exportBtn" onclick="exportList()">Export Tasks</button>
 </div>
 
 <script>
+function saveTasks() {
+    const tasks = [];
+    document.querySelectorAll('.task').forEach(t => {
+        const span = t.querySelector('span');
+        const checkbox = t.querySelector('input[type="checkbox"]');
+        tasks.push({
+            text: span.textContent,
+            checked: checkbox.checked,
+            color: t.style.background || ''
+        });
+    });
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+function loadTasks() {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.forEach(t => {
+        const div = document.createElement("div");
+        div.className = "task";
+        div.style.background = t.color;
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = t.checked;
+
+        const span = document.createElement("span");
+        span.textContent = t.text;
+        span.style.textDecoration = t.checked ? "line-through" : "none";
+        span.style.opacity = t.checked ? 0.6 : 1;
+
+        checkbox.onchange = () => {
+            span.style.textDecoration = checkbox.checked ? "line-through" : "none";
+            span.style.opacity = checkbox.checked ? 0.6 : 1;
+            saveTasks();
+        };
+
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "Delete";
+        delBtn.className = "delete-btn";
+        delBtn.onclick = () => { div.remove(); saveTasks(); };
+
+        const colorBtn = document.createElement("button");
+        colorBtn.textContent = "Color";
+        colorBtn.className = "color-btn";
+        const picker = document.createElement("input");
+        picker.type = "color";
+        picker.onchange = () => { div.style.background = picker.value; saveTasks(); };
+        colorBtn.onclick = () => picker.click();
+
+        div.appendChild(checkbox);
+        div.appendChild(span);
+        div.appendChild(delBtn);
+        div.appendChild(colorBtn);
+        div.appendChild(picker);
+
+        document.getElementById("taskList").appendChild(div);
+    });
+}
+
 function addTask() {
     const input = document.getElementById("taskInput");
     const text = input.value.trim();
@@ -124,22 +194,20 @@ function addTask() {
     checkbox.onchange = () => {
         span.style.textDecoration = checkbox.checked ? "line-through" : "none";
         span.style.opacity = checkbox.checked ? 0.6 : 1;
+        saveTasks();
     };
 
     const delBtn = document.createElement("button");
     delBtn.textContent = "Delete";
     delBtn.className = "delete-btn";
-    delBtn.onclick = () => div.remove();
+    delBtn.onclick = () => { div.remove(); saveTasks(); };
 
     const colorBtn = document.createElement("button");
     colorBtn.textContent = "Color";
     colorBtn.className = "color-btn";
-
     const picker = document.createElement("input");
     picker.type = "color";
-    picker.onchange = () => {
-        div.style.background = picker.value;
-    };
+    picker.onchange = () => { div.style.background = picker.value; saveTasks(); };
     colorBtn.onclick = () => picker.click();
 
     div.appendChild(checkbox);
@@ -150,14 +218,14 @@ function addTask() {
 
     list.appendChild(div);
     input.value = "";
+
+    saveTasks();
 }
 
 function exportList() {
     const tasks = document.querySelectorAll('.task span');
     let text = '';
-    tasks.forEach(t => {
-        text += t.textContent + '\n';
-    });
+    tasks.forEach(t => { text += t.textContent + '\n'; });
 
     const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -169,6 +237,9 @@ function exportList() {
 
     URL.revokeObjectURL(url);
 }
+
+// Load saved tasks on page load
+loadTasks();
 </script>
 </body>
 </html>
