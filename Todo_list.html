@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Modern To-Do List (Dark)</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #121212;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        padding-top: 40px;
+    }
+    .container {
+        width: 420px;
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    }
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* Input Section */
+    .new-task {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .new-task input {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #444;
+        background: #2a2a2a;
+        color: white;
+    }
+    .new-task button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #4a90e2;
+        color: white;
+    }
+
+    /* Task List */
+    #taskList {
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    #taskList::-webkit-scrollbar {
+        width: 6px;
+    }
+    #taskList::-webkit-scrollbar-thumb {
+        background: #555;
+        border-radius: 10px;
+    }
+
+    .task {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #2c2c2c;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: background 0.2s;
+    }
+    .task span {
+        flex: 1;
+        margin-left: 10px;
+    }
+
+    .task button {
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        color: white;
+    }
+    .delete-btn { background: #ff5252; }
+    .color-btn { background: #7d5fff; margin-left: 5px; }
+
+    input[type="color"] {
+        display: none;
+    }
+</style>
+</head>
+<body>
+<div class="container">
+    <h2>Modern To-Do List</h2>
+
+    <div class="new-task">
+        <input type="text" id="taskInput" placeholder="Add new task...">
+        <button onclick="addTask()">Add</button>
+    </div>
+
+    <div id="taskList"></div>
+</div>
+
+<script>
+function addTask() {
+    const input = document.getElementById("taskInput");
+    const text = input.value.trim();
+    if (!text) return;
+
+    const list = document.getElementById("taskList");
+
+    const div = document.createElement("div");
+    div.className = "task";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+
+    const span = document.createElement("span");
+    span.textContent = text;
+
+    checkbox.onchange = () => {
+        span.style.textDecoration = checkbox.checked ? "line-through" : "none";
+        span.style.opacity = checkbox.checked ? 0.6 : 1;
+    };
+
+    const delBtn = document.createElement("button");
+    delBtn.textContent = "Delete";
+    delBtn.className = "delete-btn";
+    delBtn.onclick = () => div.remove();
+
+    const colorBtn = document.createElement("button");
+    colorBtn.textContent = "Color";
+    colorBtn.className = "color-btn";
+
+    const picker = document.createElement("input");
+    picker.type = "color";
+    picker.onchange = () => {
+        div.style.background = picker.value;
+    };
+    colorBtn.onclick = () => picker.click();
+
+    div.appendChild(checkbox);
+    div.appendChild(span);
+    div.appendChild(delBtn);
+    div.appendChild(colorBtn);
+    div.appendChild(picker);
+
+    list.appendChild(div);
+    input.value = "";
+}
+</script>
+</body>
+</html>
